@@ -1,28 +1,35 @@
 <template>
   <div id="wrapper">
     <div class="top-bar">
-      <span>风一样的勇士</span>
-      <img class="avatar" src="https://i.loli.net/2019/04/17/5cb6e586879ed.png" alt="avatar">
+      <button class="refresh-button" v-on:click="refresh"/>
+      <span>Bank Simulator</span>
+      <img class="avatar" src="~@/assets/icon.png" alt="avatar">
     </div>
     <main>
-      <!-- <img id="logo" src="~@/assets/logo.png" alt="electron-vue" width="20%"> -->
       <!-- <system-information></system-information> -->
-      <div class="title">Bank Simulator</div>
+      <div class="title">总余额</div>
+      <div class="savings">
+        <div class="total">{{ balance }}</div>
+        <div class="indicator" :style="{ backgroundColor: indicatorColor }">
+          <img class="arrow" v-bind:src="arrowpng" alt="Increase">
+          <span class="percentage">{{ percentage }}</span>
+        </div>
+      </div>
       <div class="transactions">
         <div class="transaction-type">
           <div class="item-title">Transaction type</div>
-          <v-select :options="['deposit', 'withdraw', 'transfer', 'update']"></v-select>
+          <div class="item-description">你要办理哪种业务？</div>
+          <v-select v-model="type" :options="['存款', '取款', '转账']"></v-select>
         </div>
         <div class="transaction-amount">
           <div class="item-title">Transaction amount</div>
+          <div class="item-description">本次需要交易多少金额？</div>
           <input class="amount" v-model="amount" placeholder="100">
         </div>
-        <div class="confirm-button">Confirm</div>
+        <button class="confirm-button" v-on:click="submit">Confirm</button>
       </div>
     </main>
-    <footer>
-      Team Offline Flower! Made with love ©2019
-    </footer>
+    <footer>Team Offline Flower! Made with love ©2019</footer>
   </div>
 </template>
 
@@ -32,9 +39,39 @@ import SystemInformation from './Main/SystemInformation'
 export default {
   name: 'landing-page',
   components: { SystemInformation },
+  data () {
+    return {
+      balance: 'Balance',
+      percentage: 'Percent %',
+      type: '',
+      amount: '',
+      indicatorColor: '#19A553',
+      arrowpng: require('../assets/up.png')
+    }
+  },
   methods: {
     open (link) {
       this.$electron.shell.openExternal(link)
+    },
+    submit: function () {
+      alert(this.type + this.amount)
+    },
+    refresh: function () {
+      this.percentage = Math.floor(Math.random() * Math.floor(100))
+      if (this.percentage > 50) {
+        this.percentage = -this.percentage
+      } else {
+        console.log(this.percentage)
+      }
+
+      if (this.percentage >= 0) {
+        this.indicatorColor = '#19A553'
+        this.arrowpng = require('../assets/up.png')
+      } else {
+        this.indicatorColor = '#E04E36'
+        this.arrowpng = require('../assets/down.png')
+      }
+      this.percentage = this.percentage.toString() + '%'
     }
   }
 }
@@ -42,6 +79,7 @@ export default {
 
 <style>
 @import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro");
+@import url("https://fonts.googleapis.com/css?family=Maven+Pro:400,700");
 @import "./../../../node_modules/vue-select/dist/vue-select.css";
 
 * {
@@ -51,7 +89,9 @@ export default {
 }
 
 body {
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "Maven Pro", "Source Sans Pro", "Microsoft YaHei", sans-serif;
+  font-size: 14px;
+  color: #2c3e50;
 }
 
 #wrapper {
@@ -61,14 +101,8 @@ body {
     rgb(140, 25, 207) 100%
   );
   height: 100vh;
-  padding: 10px;
+  padding: 20px;
   width: 100vw;
-}
-
-#logo {
-  height: auto;
-  margin-bottom: 20px;
-  width: 420px;
 }
 
 .top-bar {
@@ -80,10 +114,11 @@ body {
   text-align: right;
   font-size: 14px;
   vertical-align: middle;
+  -webkit-app-region: drag;
 }
 
 .top-bar .avatar {
-  background: #ffffff;
+  /* background: #ffffff; */
   border-radius: 100px;
   width: 26px;
   height: 26px;
@@ -101,11 +136,37 @@ main {
 }
 
 .title {
-  color: #2c3e50;
-  font-size: 36px;
-  font-weight: bolder;
-  margin-bottom: 6px;
+  font-size: 14px;
   margin-top: 120px;
+}
+
+.savings {
+  color: #2c3e50;
+  margin-bottom: 6px;
+  vertical-align: middle;
+}
+
+.savings .total {
+  font-size: 42px;
+  float: left;
+  /* display: inline-block; */
+}
+
+.savings .indicator {
+  margin-left: 15px;
+  margin-top: 13px;
+  float: left;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.indicator .arrow {
+  height: 10px;
+  width: auto;
+}
+
+.indicator .percentage {
+  color: #ffffff;
 }
 
 .transactions {
@@ -116,30 +177,37 @@ main {
   margin-top: 25px;
   margin-bottom: 10px;
   font-size: 18px;
-  font-weight: bold;
+}
+
+.transactions .item-description {
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #a0a0a0;
 }
 
 .transactions .amount {
   width: 100%;
-  line-height: 50px;
+  line-height: 32px;
   font-size: 14px;
   text-align: center;
-  border: 1px solid #2942ad;
-  margin-top: 10px;
+  /* border: 1px solid #2942ad; */
+  border: 1px solid rgba(60, 60, 60, 0.26);
   border-radius: 5px;
   color: grey;
 }
 
 .transactions .confirm-button {
-  margin-top: 25px;
+  margin-top: 36px;
   width: 100%;
   padding: 10px;
+  font-size: 18px;
   text-align: center;
   color: #ffffff;
   background: rgb(44, 69, 180);
   border: #2942ad 1px solid;
   border-radius: 5px;
   transition: all 0.5s ease;
+  -webkit-app-region: no-drag;
 }
 
 .transactions .confirm-button:hover {
@@ -149,6 +217,37 @@ main {
   border-radius: 5px;
 }
 
+.refresh-button {
+  width: 12px;
+  height: 12px;
+  margin-right: 5px;
+  margin-bottom: 3px;
+  vertical-align: middle;
+  background-color: Transparent;
+  background-image: url("../assets/refresh.png");
+  background-size: contain;
+  border: none;
+  cursor: pointer;
+  overflow: hidden;
+  -webkit-app-region: no-drag;
+}
+
+.refresh-button:hover {
+  animation-name: spin;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+  animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+
+@keyframes spin {
+  from {
+    transform:rotate(0deg);
+  }
+  to {
+    transform:rotate(360deg);
+  }
+}
+
 footer {
   font-size: 12px;
   width: 100%;
@@ -156,33 +255,4 @@ footer {
   text-align: right;
   color: #ffffff;
 }
-
-.title.alt {
-  font-size: 18px;
-  margin-bottom: 10px;
-}
-
-.doc p {
-  color: black;
-  margin-bottom: 10px;
-}
-
-.doc button {
-  font-size: 0.8em;
-  cursor: pointer;
-  outline: none;
-  padding: 0.75em 2em;
-  border-radius: 2em;
-  display: inline-block;
-  color: #fff;
-  background-color: #4fc08d;
-  box-sizing: border-box;
-  border: 1px solid #4fc08d;
-}
-
-.doc button.alt {
-  color: #42b983;
-  background-color: transparent;
-}
-/* transition: all 0.15s ease; */
 </style>
