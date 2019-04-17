@@ -8608,6 +8608,11 @@ vue-router@^3.0.1:
   resolved "https://registry.yarnpkg.com/vue-router/-/vue-router-3.0.5.tgz#24636923c7f1a62da3a577cf75a058f9fa328581"
   integrity sha512-DGU+7+eeiSq/oNZ6epA/rcNkAd0m2+uugR5i4Eh4KBvclUmorvNJ6iForYjQkgvKi9GdamybaMpl85eDgxM2eQ==
 
+vue-select@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/vue-select/-/vue-select-3.0.0.tgz#05ffc8825dea96c64f539c502df502a31a82ddf9"
+  integrity sha512-obvi/sRAF4oiXqF+faGdTyftFJUKnO5KeJQ3e4KzQ/8Uw/AOGdNO9WmivD6jD2MN7AhLFtH87bMzn8koOdzLWg==
+
 vue-style-loader@^4.1.0:
   version "4.1.2"
   resolved "https://registry.yarnpkg.com/vue-style-loader/-/vue-style-loader-4.1.2.tgz#dedf349806f25ceb4e64f3ad7c0a44fba735fcf8"
