@@ -2,8 +2,21 @@
   <div id="wrapper">
     <div class="top-bar">
       <button class="refresh-button" v-on:click="refresh"/>
-      <span>Bank Simulator</span>
-      <img class="avatar" src="~@/assets/icon.png" alt="avatar">
+      <span>{{ userName }}</span>
+      <img class="avatar" v-if="showMenu" key="on" @click="showMenu = false" src="~@/assets/close.png" alt="avatar">
+      <img class="avatar" v-else key="off" @click="showMenu = true" src="~@/assets/account.png" alt="avatar">
+      <transition name="dropdown">
+      <div class="top-menu" v-bind:class="{ active: showMenu }" v-if="showMenu">
+        <ul class="top-menu-list">
+          <li>
+            <button class="account" @click="showAccountInfo">Account</button>
+          </li>
+          <li>
+            <button class="logOut" @click="logOut">Log out</button>
+          </li>
+        </ul>
+      </div>
+      </transition>
     </div>
     <main>
       <!-- <system-information></system-information> -->
@@ -41,6 +54,8 @@ export default {
   components: { SystemInformation },
   data () {
     return {
+      showMenu: false,
+      userName: 'Bank Simulator',
       balance: 'Balance',
       percentage: 'Percent %',
       type: '',
@@ -72,6 +87,12 @@ export default {
         this.arrowpng = require('../assets/down.png')
       }
       this.percentage = this.percentage.toString() + '%'
+    },
+    showAccountInfo: function () {
+      alert('风一样的勇士')
+    },
+    logOut: function () {
+      alert('Logging out...')
     }
   }
 }
@@ -118,12 +139,11 @@ body {
 }
 
 .top-bar .avatar {
-  /* background: #ffffff; */
   border-radius: 100px;
-  width: 26px;
-  height: 26px;
+  width: 15px;
+  height: 15px;
   vertical-align: middle;
-  margin-bottom: 8px;
+  margin-bottom: 3px;
   margin-left: 6px;
 }
 
@@ -170,7 +190,7 @@ main {
 }
 
 .transactions {
-  margin-top: 120px;
+  margin-top: 180px;
 }
 
 .transactions .item-title {
@@ -194,6 +214,10 @@ main {
   border: 1px solid rgba(60, 60, 60, 0.26);
   border-radius: 5px;
   color: grey;
+}
+
+.transactions .amount:focus {
+  outline: 1px solid #2942ad;
 }
 
 .transactions .confirm-button {
@@ -254,5 +278,50 @@ footer {
   margin-top: 10px;
   text-align: right;
   color: #ffffff;
+}
+
+.vs__dropdown-option--highlight {
+  background: #2E49B1 !important;
+}
+
+.top-menu {
+  background-color: #ffffff;
+  border-radius: 5px;
+  position: fixed;
+  margin-top: 60px;
+  margin-right: 20px;
+  box-shadow: 0px 1px 20px 2px rgba(140, 25, 207, 0.5);
+  right: 0;
+  top: 0;
+}
+
+.top-menu .top-menu-list {
+  list-style: none;
+  text-align: center;
+}
+
+.top-menu .top-menu-list button {
+  width: 100%;
+  padding: 10px 15px;
+  font-size: 14px;
+  background-color: transparent;
+  border: none;
+  color: rgb(140, 25, 207);
+  cursor: pointer;
+}
+
+.top-menu .top-menu-list button:hover {
+  background-color: rgb(140, 25, 207);
+  color: #ffffff;
+}
+
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: all 0.5s;
+}
+.dropdown-enter,
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 </style>

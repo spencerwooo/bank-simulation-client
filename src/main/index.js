@@ -23,7 +23,7 @@ function createWindow () {
     height: 800,
     minHeight: 800,
     useContentSize: true,
-    width: 500,
+    width: 420,
     minWidth: 420,
     titleBarStyle: 'hiddenInset'
   })
