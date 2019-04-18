@@ -9,7 +9,7 @@
       <div class="top-menu" v-bind:class="{ active: showMenu }" v-if="showMenu">
         <ul class="top-menu-list">
           <li>
-            <button class="account" @click="showAccountInfo">Account</button>
+            <button class="account" @click="showAccountInfo = true">Account</button>
           </li>
           <li>
             <button class="logOut" @click="logOut">Log out</button>
@@ -17,6 +17,25 @@
         </ul>
       </div>
       </transition>
+      <vue-modaltor :visible="showAccountInfo" :animation-panel="'modal-slide-bottom'" :bg-overlay="'rgba(255, 255, 255, 0.9)'" :bg-panel="'rgb(23, 50, 170)'" @hide="hideAccountPanel">
+        <template slot="close-icon">
+          <svg
+            version="1.1"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 40 40"
+            width="20"
+            height="20"
+            xml:space="preserve"
+          >
+            <path
+              class="st0"
+              fill="#ffffff"
+              d="M8.7,7.6c-0.4-0.4-1-0.4-1.4,0C6.9,8,6.9,8.6,7.3,9l11,11l-11,11c-0.4,0.4-0.4,1,0,1.4c0.4,0.4,1,0.4,1.4,0 l11-11l11,11c0.4,0.4,1,0.4,1.4,0c0.4-0.4,0.4-1,0-1.4l-11-11L32,9c0.4-0.4,0.4-1,0-1.4c-0.4-0.4-1-0.4-1.4,0l-11,11L8.7,7.6z"
+            />
+          </svg>
+        </template>
+        <UserInfo/>
+      </vue-modaltor>
     </div>
     <main>
       <!-- <system-information></system-information> -->
@@ -47,14 +66,15 @@
 </template>
 
 <script>
-import SystemInformation from './Main/SystemInformation'
+import UserInfo from './Main/UserInfo'
 
 export default {
   name: 'landing-page',
-  components: { SystemInformation },
+  components: { UserInfo },
   data () {
     return {
       showMenu: false,
+      showAccountInfo: false,
       userName: 'Bank Simulator',
       balance: 'Balance',
       percentage: 'Percent %',
@@ -88,8 +108,8 @@ export default {
       }
       this.percentage = this.percentage.toString() + '%'
     },
-    showAccountInfo: function () {
-      alert('风一样的勇士')
+    hideAccountPanel: function () {
+      this.showAccountInfo = false
     },
     logOut: function () {
       alert('Logging out...')
@@ -317,7 +337,7 @@ footer {
 
 .dropdown-enter-active,
 .dropdown-leave-active {
-  transition: all 0.5s;
+  transition: all 0.2s;
 }
 .dropdown-enter,
 .dropdown-leave-to {
