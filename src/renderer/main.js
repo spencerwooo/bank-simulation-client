@@ -2,6 +2,7 @@ import Vue from 'vue'
 import axios from 'axios'
 import vSelect from 'vue-select'
 import VueModalTor from 'vue-modaltor'
+import VueElementLoading from 'vue-element-loading'
 
 import App from './App'
 import router from './router'
@@ -11,6 +12,7 @@ Vue.http = Vue.prototype.$http = axios
 Vue.config.productionTip = false
 
 Vue.component('v-select', vSelect)
+Vue.component('VueElementLoading', VueElementLoading)
 Vue.use(VueModalTor)
 
 /* eslint-disable no-new */

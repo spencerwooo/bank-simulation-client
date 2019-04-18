@@ -3,21 +3,41 @@
     <div class="top-bar">
       <button class="refresh-button" v-on:click="refresh"/>
       <span>{{ userName }}</span>
-      <img class="avatar" v-if="showMenu" key="on" @click="showMenu = false" src="~@/assets/close.png" alt="avatar">
-      <img class="avatar" v-else key="off" @click="showMenu = true" src="~@/assets/account.png" alt="avatar">
+      <img
+        class="avatar"
+        v-if="showMenu"
+        key="on"
+        @click="showMenu = false"
+        src="~@/assets/close.png"
+        alt="avatar"
+      >
+      <img
+        class="avatar"
+        v-else
+        key="off"
+        @click="showMenu = true"
+        src="~@/assets/account.png"
+        alt="avatar"
+      >
       <transition name="dropdown">
-      <div class="top-menu" v-bind:class="{ active: showMenu }" v-if="showMenu">
-        <ul class="top-menu-list">
-          <li>
-            <button class="account" @click="showAccountInfo = true">Account</button>
-          </li>
-          <li>
-            <button class="logOut" @click="logOut">Log out</button>
-          </li>
-        </ul>
-      </div>
+        <div class="top-menu" v-bind:class="{ active: showMenu }" v-if="showMenu">
+          <ul class="top-menu-list">
+            <li>
+              <button class="account" @click="showAccountPanel">Account</button>
+            </li>
+            <li>
+              <button class="logOut" @click="logOut">Log out</button>
+            </li>
+          </ul>
+        </div>
       </transition>
-      <vue-modaltor :visible="showAccountInfo" :animation-panel="'modal-slide-bottom'" :bg-overlay="'rgba(255, 255, 255, 0.9)'" :bg-panel="'rgb(23, 50, 170)'" @hide="hideAccountPanel">
+      <vue-modaltor
+        :visible="showAccountInfo"
+        :animation-panel="'modal-slide-bottom'"
+        :bg-overlay="'rgba(255, 255, 255, 0.9)'"
+        :bg-panel="'rgb(23, 50, 170)'"
+        @hide="hideAccountPanel"
+      >
         <template slot="close-icon">
           <svg
             version="1.1"
@@ -31,17 +51,19 @@
               class="st0"
               fill="#ffffff"
               d="M8.7,7.6c-0.4-0.4-1-0.4-1.4,0C6.9,8,6.9,8.6,7.3,9l11,11l-11,11c-0.4,0.4-0.4,1,0,1.4c0.4,0.4,1,0.4,1.4,0 l11-11l11,11c0.4,0.4,1,0.4,1.4,0c0.4-0.4,0.4-1,0-1.4l-11-11L32,9c0.4-0.4,0.4-1,0-1.4c-0.4-0.4-1-0.4-1.4,0l-11,11L8.7,7.6z"
-            />
+            ></path>
           </svg>
         </template>
         <UserInfo/>
       </vue-modaltor>
     </div>
     <main>
-      <!-- <system-information></system-information> -->
+      <vue-element-loading :active="loading">
+        <img src="~@/assets/loading.svg" alt="loading" width="120px" height="120px">
+      </vue-element-loading>
       <div class="title">总余额</div>
       <div class="savings">
-        <div class="total">{{ balance }}</div>
+        <div class="total">${{ balance }}</div>
         <div class="indicator" :style="{ backgroundColor: indicatorColor }">
           <img class="arrow" v-bind:src="arrowpng" alt="Increase">
           <span class="percentage">{{ percentage }}</span>
@@ -56,7 +78,7 @@
         <div class="transaction-amount">
           <div class="item-title">Transaction amount</div>
           <div class="item-description">本次需要交易多少金额？</div>
-          <input class="amount" v-model="amount" placeholder="100">
+          <input class="amount" v-model="amount">
         </div>
         <button class="confirm-button" v-on:click="submit">Confirm</button>
       </div>
@@ -75,9 +97,11 @@ export default {
     return {
       showMenu: false,
       showAccountInfo: false,
+      loading: false,
       userName: 'Bank Simulator',
       balance: 'Balance',
-      percentage: 'Percent %',
+      balanceData: 0,
+      percentage: 'Percent%',
       type: '',
       amount: '',
       indicatorColor: '#19A553',
@@ -92,21 +116,40 @@ export default {
       alert(this.type + this.amount)
     },
     refresh: function () {
-      this.percentage = Math.floor(Math.random() * Math.floor(100))
-      if (this.percentage > 50) {
-        this.percentage = -this.percentage
-      } else {
-        console.log(this.percentage)
-      }
+      this.loading = true
+      let requestUrl = 'https://qrng.anu.edu.au/API/jsonI.php?length=1&type=uint16'
+      let balance
+      this.$http
+        .get(requestUrl)
+        .then(response => {
+          balance = response.data.data[0]
 
-      if (this.percentage >= 0) {
-        this.indicatorColor = '#19A553'
-        this.arrowpng = require('../assets/up.png')
-      } else {
-        this.indicatorColor = '#E04E36'
-        this.arrowpng = require('../assets/down.png')
-      }
-      this.percentage = this.percentage.toString() + '%'
+          if (this.balance === 'Balance') {
+            this.percentage = 'Percent'
+          } else {
+            this.percentage = ((balance - this.balanceData) / balance * 100).toFixed(2)
+          }
+          this.balanceData = balance
+          this.balance = this.balanceData.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
+
+          if (this.percentage >= 0 || this.percentage === 'Percent') {
+            this.indicatorColor = '#19A553'
+            this.arrowpng = require('../assets/up.png')
+          } else {
+            this.indicatorColor = '#E04E36'
+            this.arrowpng = require('../assets/down.png')
+          }
+          this.percentage = this.percentage.toString() + '%'
+          this.loading = false
+        })
+        .catch(() => {
+          alert('Failed to load balance.')
+          this.loading = false
+        })
+    },
+    showAccountPanel: function () {
+      this.showAccountInfo = true
+      this.showMenu = false
     },
     hideAccountPanel: function () {
       this.showAccountInfo = false
@@ -285,10 +328,10 @@ main {
 
 @keyframes spin {
   from {
-    transform:rotate(0deg);
+    transform: rotate(0deg);
   }
   to {
-    transform:rotate(360deg);
+    transform: rotate(360deg);
   }
 }
 
@@ -301,7 +344,7 @@ footer {
 }
 
 .vs__dropdown-option--highlight {
-  background: #2E49B1 !important;
+  background: #2e49b1 !important;
 }
 
 .top-menu {
@@ -313,6 +356,7 @@ footer {
   box-shadow: 0px 1px 20px 2px rgba(140, 25, 207, 0.5);
   right: 0;
   top: 0;
+  z-index: 5000;
 }
 
 .top-menu .top-menu-list {

@@ -8576,6 +8576,13 @@ vue-electron@^1.0.6:
   resolved "https://registry.yarnpkg.com/vue-electron/-/vue-electron-1.0.6.tgz#e798e03180b8933539defe31f92e53b9242b9406"
   integrity sha1-55jgMYC4kzU53v4x+S5TuSQrlAY=
 
+vue-element-loading@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/vue-element-loading/-/vue-element-loading-1.1.1.tgz#3cb693ddd4538c769a063bb4c01553f909236f18"
+  integrity sha512-/HJqdWbBgyTg45c+u3oUZVyEBzC3imft8Ezrf37Ups3+PgJ1ltdmlJowx+sMXMshNa9b9v2WVHe+qp0GGgwTHw==
+  dependencies:
+    vue "^2.5.22"
+
 vue-hot-reload-api@^2.3.0:
   version "2.3.3"
   resolved "https://registry.yarnpkg.com/vue-hot-reload-api/-/vue-hot-reload-api-2.3.3.tgz#2756f46cb3258054c5f4723de8ae7e87302a1ccf"
@@ -8647,7 +8654,7 @@ vue@2.5.11:
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.5.11.tgz#80ca2657aa81f03545cd8dd5a2f55454641e6405"
   integrity sha512-FZzUIvJa1jsFSfy6OITgjzoCtnxI8uHkewa2QCCCIgRj7ObsalXKLTf3S5sBP+kyusTctl3fKej+NHoBUCVPlA==
 
-vue@^2.5.16:
+vue@^2.5.16, vue@^2.5.22:
   version "2.6.10"
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.6.10.tgz#a72b1a42a4d82a721ea438d1b6bf55e66195c637"
   integrity sha512-ImThpeNU9HbdZL3utgMCq0oiMzAkt1mcgy3/E6zWC/G6AaQoeuFdsl9nDhTDU3X1R6FK7nsIUuRACVcjI+A2GQ==
