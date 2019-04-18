@@ -117,20 +117,31 @@ export default {
     },
     refresh: function () {
       this.loading = true
-      let requestUrl = 'https://qrng.anu.edu.au/API/jsonI.php?length=1&type=uint16'
-      let balance
-      this.$http
-        .get(requestUrl)
+      let requestUrl =
+        'https://qrng.anu.edu.au/API/jsonI.php?length=1&type=uint16'
+      this.$http({
+        method: 'get',
+        url: requestUrl,
+        timeout: 1000 * 5,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
         .then(response => {
-          balance = response.data.data[0]
+          let balance = response.data.data[0]
 
           if (this.balance === 'Balance') {
             this.percentage = 'Percent'
           } else {
-            this.percentage = ((balance - this.balanceData) / balance * 100).toFixed(2)
+            this.percentage = (
+              ((balance - this.balanceData) / balance) *
+              100
+            ).toFixed(2)
           }
           this.balanceData = balance
-          this.balance = this.balanceData.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
+          this.balance = this.balanceData
+            .toString()
+            .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
 
           if (this.percentage >= 0 || this.percentage === 'Percent') {
             this.indicatorColor = '#19A553'
