@@ -166,6 +166,7 @@ export default {
       this.showAccountInfo = false
     },
     logOut: function () {
+      this.showMenu = false
       alert('Logging out...')
     }
   }
