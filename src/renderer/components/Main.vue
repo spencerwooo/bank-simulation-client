@@ -89,6 +89,9 @@
 
 <script>
 import UserInfo from './Main/UserInfo'
+import { setTimeout } from 'timers'
+
+let requestUrl = 'http://bk.felinae98.cn:8001/'
 
 export default {
   name: 'landing-page',
@@ -112,52 +115,118 @@ export default {
     open (link) {
       this.$electron.shell.openExternal(link)
     },
-    submit: function () {
-      alert(this.type + this.amount)
+
+    poll (func, timeout, interval) {
+      let endTime = Number(new Date()) + timeout || 2000
+      interval = interval || 100
+
+      let checkCondition = (resolve, reject) => {
+        let ajax = func()
+
+        ajax.then(response => {
+          console.log(response)
+          if (response === 'TransactionDone') {
+            resolve(response)
+          } else if (Number(new Date()) < endTime) {
+            setTimeout(checkCondition, interval, resolve, reject)
+          } else {
+            reject(new Error('Queue timed out. Please refresh.'))
+          }
+        })
+      }
+
+      return new Promise(checkCondition)
     },
+
+    submit: function () {
+      if (this.type === '转账') {
+        alert('This feature is not yet implemented.')
+      } else {
+        alert(this.type + this.amount)
+      }
+
+      this.type = null
+      this.amount = null
+    },
+
     refresh: function () {
       this.loading = true
-      let requestUrl =
-        'https://qrng.anu.edu.au/API/jsonI.php?length=1&type=uint16'
+
       this.$http({
-        method: 'get',
-        url: requestUrl,
-        timeout: 1000 * 5,
+        method: 'post',
+        url: requestUrl + 'queue',
         headers: {
           'Content-Type': 'application/json'
+        },
+        data: {
+          'transactionType': 'general',
+          'account': {
+            'username': 'Garvey',
+            'password': 'GarveyPassword'
+          },
+          'transactions': {
+            'type': 'query'
+          }
         }
       })
         .then(response => {
-          let balance = response.data.data[0]
+          let token = response.data
+          console.log(token)
 
-          if (this.balance === 'Balance') {
-            this.percentage = 'Percent'
-          } else {
-            this.percentage = (
-              ((balance - this.balanceData) / balance) *
-              100
-            ).toFixed(2)
-          }
-          this.balanceData = balance
-          this.balance = this.balanceData
-            .toString()
-            .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
+          this.poll(function () {
+            return this.$http.get(requestUrl + 'status', {
+              params: {
+                session: token
+              }
+            })
+          }, 5000, 150)
+            .then(() => {
+              this.$http.get(requestUrl + 'result', {
+                params: {
+                  session: token
+                }
+              })
+                .then(response => {
+                  console.log(response.data)
+                  this.loading = false
+                })
+                .catch(err => {
+                  alert(err)
+                  this.loading = false
+                })
+            })
 
-          if (this.percentage >= 0 || this.percentage === 'Percent') {
-            this.indicatorColor = '#19A553'
-            this.arrowpng = require('../assets/up.png')
-          } else {
-            this.indicatorColor = '#E04E36'
-            this.arrowpng = require('../assets/down.png')
-          }
-          this.percentage = this.percentage.toString() + '%'
-          this.loading = false
-        })
-        .catch(() => {
-          alert('Failed to load balance.')
-          this.loading = false
+        //   let balance = response.data.data[0]
+
+        //   if (this.balance === 'Balance') {
+        //     this.percentage = 'Percent'
+        //   } else {
+        //     this.percentage = (
+        //       ((balance - this.balanceData) / balance) *
+        //       100
+        //     ).toFixed(2)
+        //   }
+        //   this.balanceData = balance
+        //   this.balance = this.balanceData
+        //     .toString()
+        //     .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
+
+        //   if (this.percentage >= 0 || this.percentage === 'Percent') {
+        //     this.indicatorColor = '#19A553'
+        //     this.arrowpng = require('../assets/up.png')
+        //   } else {
+        //     this.indicatorColor = '#E04E36'
+        //     this.arrowpng = require('../assets/down.png')
+        //   }
+        //   this.percentage = this.percentage.toString() + '%'
+        //   this.loading = false
+        // })
+        // .catch(() => {
+        //   alert('Failed to load balance.')
+        //   this.loading = false
         })
     },
+
     showAccountPanel: function () {
       this.showAccountInfo = true
       this.showMenu = false
