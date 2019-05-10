@@ -89,7 +89,7 @@
 
 <script>
 import UserInfo from './Main/UserInfo'
-import { setTimeout, clearInterval, setInterval } from 'timers'
+import { setTimeout } from 'timers'
 
 let requestUrl = 'http://bk.felinae98.cn:8001/'
 
@@ -124,22 +124,37 @@ export default {
       this.$electron.shell.openExternal(link)
     },
 
-    // 轮询 '/status'，直到返回 TransactionDone
-    polling (token) {
-      this.$http.get(requestUrl + 'status', {
+    checkStatus (token) {
+      return this.$http.get(requestUrl + 'status', {
         params: {
           session: token
         }
       })
-        .then(response => {
-          console.log('Response:' + response.data)
+    },
+
+    // 轮询 '/status'，直到返回 TransactionDone
+    poll (fn, timeout, interval) {
+      console.log('Start polling...')
+      let endTime = Number(new Date()) + timeout || 2000
+      interval = interval || 100
+
+      let checkCondition = (resolve, reject) => {
+        let ajax = fn()
+
+        ajax.then(response => {
+          console.log(response.data)
 
           if (response.data === 'TransactionDone') {
-            clearInterval(this.pollingInterval)
-            this.loading = false
+            resolve(response.data)
+          } else if (Number(new Date()) < endTime) {
+            setTimeout(checkCondition, interval, resolve, reject)
+          } else {
+            reject(new Error('Timeout, rejected.'))
           }
-          this.pollingStatus = response.data
         })
+      }
+
+      return new Promise(checkCondition)
     },
 
     submit: function () {
@@ -156,72 +171,78 @@ export default {
     refresh: function () {
       this.loading = true
 
+      let queryData = {
+        'transactionType': 'general',
+        'account': {
+          'username': 'Garvey',
+          'password': 'GarveyPassword'
+        },
+        'transactions': {
+          'type': 'query'
+        }
+      }
+
       this.$http({
         method: 'post',
         url: requestUrl + 'queue',
         headers: {
           'Content-Type': 'application/json'
         },
-        data: {
-          'transactionType': 'general',
-          'account': {
-            'username': 'Garvey',
-            'password': 'GarveyPassword'
-          },
-          'transactions': {
-            'type': 'query'
-          }
-        }
+        data: queryData
       })
         .then(response => {
           let token = response.data
           console.log(token)
 
-          this.polling(token)
+          this.poll(() => {
+            return this.$http.get(requestUrl + 'status', {
+              params: {
+                session: token
+              }
+            })
+          }, 1000 * 10, 100)
+            .then(result => {
+              console.log('Transaction done. ' + result)
 
-          console.log(this.pollingStatus)
+              this.$http.get(requestUrl + 'result', {
+                params: {
+                  session: token
+                }
+              })
+                .then(response => {
+                  let balance = response.data.balance
+                  if (this.balance === 'Balance') {
+                    this.percentage = 'Percent'
+                  } else {
+                    this.percentage = (
+                      ((balance - this.balanceData) / balance) *
+                  100
+                    ).toFixed(2)
+                  }
+                  this.balanceData = balance
+                  this.balance = this.balanceData
+                    .toString()
+                    .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
 
-          if (this.pollingStatus !== 'TransactionDone') {
-            console.log('Refreshing...')
-
-            this.pollingInterval = setInterval(() => {
-              console.log('Refreshing...')
-              this.polling(token)
-            }, 500)
-
-            setTimeout(() => {
-              clearInterval(this.pollingInterval)
-            }, 1000 * 10)
-          }
-
-        //   let balance = response.data.data[0]
-
-        //   if (this.balance === 'Balance') {
-        //     this.percentage = 'Percent'
-        //   } else {
-        //     this.percentage = (
-        //       ((balance - this.balanceData) / balance) *
-        //       100
-        //     ).toFixed(2)
-        //   }
-        //   this.balanceData = balance
-        //   this.balance = this.balanceData
-        //     .toString()
-        //     .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
-
-        //   if (this.percentage >= 0 || this.percentage === 'Percent') {
-        //     this.indicatorColor = '#19A553'
-        //     this.arrowpng = require('../assets/up.png')
-        //   } else {
-        //     this.indicatorColor = '#E04E36'
-        //     this.arrowpng = require('../assets/down.png')
-        //   }
-        //   this.percentage = this.percentage.toString() + '%'
-        //   this.loading = false
-        // })
-        // .catch(() => {
-        //   alert('Failed to load balance.')
-        //   this.loading = false
+                  if (this.percentage >= 0 || this.percentage === 'Percent') {
+                    this.indicatorColor = '#19A553'
+                    this.arrowpng = require('../assets/up.png')
+                  } else {
+                    this.indicatorColor = '#E04E36'
+                    this.arrowpng = require('../assets/down.png')
+                  }
+                  this.percentage = this.percentage.toString() + '%'
+                  this.loading = false
+                })
+                .catch(err => {
+                  alert(err)
+                  this.loading = false
+                })
+            })
+            .catch(() => {
+              alert('Failed to load balance.')
+              this.loading = false
+            })
         })
     },
 
