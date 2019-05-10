@@ -89,7 +89,7 @@
 
 <script>
 import UserInfo from './Main/UserInfo'
-import { setTimeout } from 'timers'
+import { setTimeout, clearInterval, setInterval } from 'timers'
 
 let requestUrl = 'http://bk.felinae98.cn:8001/'
 
@@ -98,9 +98,17 @@ export default {
   components: { UserInfo },
   data () {
     return {
+      // 显示菜单
       showMenu: false,
       showAccountInfo: false,
+      // 等待过渡动画加载
       loading: false,
+
+      // 轮询
+      pollingStatus: null,
+      pollingInterval: null,
+
+      // 数据
       userName: 'Bank Simulator',
       balance: 'Balance',
       balanceData: 0,
@@ -116,26 +124,22 @@ export default {
       this.$electron.shell.openExternal(link)
     },
 
-    poll (func, timeout, interval) {
-      let endTime = Number(new Date()) + timeout || 2000
-      interval = interval || 100
+    // 轮询 '/status'，直到返回 TransactionDone
+    polling (token) {
+      this.$http.get(requestUrl + 'status', {
+        params: {
+          session: token
+        }
+      })
+        .then(response => {
+          console.log('Response:' + response.data)
 
-      let checkCondition = (resolve, reject) => {
-        let ajax = func()
-
-        ajax.then(response => {
-          console.log(response)
-          if (response === 'TransactionDone') {
-            resolve(response)
-          } else if (Number(new Date()) < endTime) {
-            setTimeout(checkCondition, interval, resolve, reject)
-          } else {
-            reject(new Error('Queue timed out. Please refresh.'))
+          if (response.data === 'TransactionDone') {
+            clearInterval(this.pollingInterval)
+            this.loading = false
           }
+          this.pollingStatus = response.data
         })
-      }
-
-      return new Promise(checkCondition)
     },
 
     submit: function () {
@@ -173,28 +177,22 @@ export default {
           let token = response.data
           console.log(token)
 
-          this.poll(function () {
-            return this.$http.get(requestUrl + 'status', {
-              params: {
-                session: token
-              }
-            })
-          }, 5000, 150)
-            .then(() => {
-              this.$http.get(requestUrl + 'result', {
-                params: {
-                  session: token
-                }
-              })
-                .then(response => {
-                  console.log(response.data)
-                  this.loading = false
-                })
-                .catch(err => {
-                  alert(err)
-                  this.loading = false
-                })
-            })
+          this.polling(token)
+
+          console.log(this.pollingStatus)
+
+          if (this.pollingStatus !== 'TransactionDone') {
+            console.log('Refreshing...')
+
+            this.pollingInterval = setInterval(() => {
+              console.log('Refreshing...')
+              this.polling(token)
+            }, 500)
+
+            setTimeout(() => {
+              clearInterval(this.pollingInterval)
+            }, 1000 * 10)
+          }
 
         //   let balance = response.data.data[0]
 
