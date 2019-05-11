@@ -59,8 +59,6 @@
     </div>
     <main>
       <vue-element-loading :active="loading" >
-        {{ pollingProgress }}
-
         <img src="~@/assets/loading.svg" alt="loading" width="120px" height="120px">
       </vue-element-loading>
       <div class="title">总余额</div>
@@ -114,21 +112,12 @@ export default {
       type: '',
       amount: '',
       indicatorColor: '#19A553',
-      arrowpng: require('../assets/up.png'),
-      pollingProgress: null
+      arrowpng: require('../assets/up.png')
     }
   },
   methods: {
     open (link) {
       this.$electron.shell.openExternal(link)
-    },
-
-    checkStatus (token) {
-      return this.$http.get(requestUrl + 'status', {
-        params: {
-          session: token
-        }
-      })
     },
 
     poll (fn, timeout, interval) {
@@ -137,9 +126,10 @@ export default {
 
       var checkCondition = function (resolve, reject) {
         var ajax = fn()
-        // dive into the ajax promise
+
         ajax.then(function (response) {
-          // If the condition is met, we're done!
+          console.log(response.data)
+
           if (response.data === 'TransactionDone') {
             resolve(response.data)
           } else if (Number(new Date()) < endTime) {
@@ -200,8 +190,6 @@ export default {
               }
             })
           }, timeout, interval).then(response => {
-            console.log(response)
-
             this.$http.get(requestUrl + 'result', {
               params: {
                 session: token
