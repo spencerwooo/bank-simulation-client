@@ -58,7 +58,9 @@
       </vue-modaltor>
     </div>
     <main>
-      <vue-element-loading :active="loading">
+      <vue-element-loading :active="loading" >
+        {{ pollingProgress }}
+
         <img src="~@/assets/loading.svg" alt="loading" width="120px" height="120px">
       </vue-element-loading>
       <div class="title">总余额</div>
@@ -89,7 +91,7 @@
 
 <script>
 import UserInfo from './Main/UserInfo'
-import { setTimeout } from 'timers'
+// import { setTimeout } from 'timers'
 
 let requestUrl = 'http://bk.felinae98.cn:8001/'
 
@@ -104,10 +106,6 @@ export default {
       // 等待过渡动画加载
       loading: false,
 
-      // 轮询
-      pollingStatus: null,
-      pollingInterval: null,
-
       // 数据
       userName: 'Bank Simulator',
       balance: 'Balance',
@@ -116,7 +114,8 @@ export default {
       type: '',
       amount: '',
       indicatorColor: '#19A553',
-      arrowpng: require('../assets/up.png')
+      arrowpng: require('../assets/up.png'),
+      pollingProgress: null
     }
   },
   methods: {
@@ -132,24 +131,21 @@ export default {
       })
     },
 
-    // 轮询 '/status'，直到返回 TransactionDone
     poll (fn, timeout, interval) {
-      console.log('Start polling...')
-      let endTime = Number(new Date()) + timeout || 2000
+      var endTime = Number(new Date()) + (timeout || 2000)
       interval = interval || 100
 
-      let checkCondition = (resolve, reject) => {
-        let ajax = fn()
-
-        ajax.then(response => {
-          console.log(response.data)
-
+      var checkCondition = function (resolve, reject) {
+        var ajax = fn()
+        // dive into the ajax promise
+        ajax.then(function (response) {
+          // If the condition is met, we're done!
           if (response.data === 'TransactionDone') {
             resolve(response.data)
           } else if (Number(new Date()) < endTime) {
             setTimeout(checkCondition, interval, resolve, reject)
           } else {
-            reject(new Error('Timeout, rejected.'))
+            reject(new Error('Timed out!'))
           }
         })
       }
@@ -194,55 +190,59 @@ export default {
           let token = response.data
           console.log(token)
 
+          let timeout = 10 * 1000
+          let interval = 1 * 1000
+
           this.poll(() => {
             return this.$http.get(requestUrl + 'status', {
               params: {
                 session: token
               }
             })
-          }, 1000 * 10, 100)
-            .then(result => {
-              console.log('Transaction done. ' + result)
+          }, timeout, interval).then(response => {
+            console.log(response)
 
-              this.$http.get(requestUrl + 'result', {
-                params: {
-                  session: token
-                }
+            this.$http.get(requestUrl + 'result', {
+              params: {
+                session: token
+              }
+            })
+              .then(response => {
+                console.log(response.data)
+
+                this.loading = false
               })
-                .then(response => {
-                  let balance = response.data.balance
-                  if (this.balance === 'Balance') {
-                    this.percentage = 'Percent'
-                  } else {
-                    this.percentage = (
-                      ((balance - this.balanceData) / balance) *
-                  100
-                    ).toFixed(2)
-                  }
-                  this.balanceData = balance
-                  this.balance = this.balanceData
-                    .toString()
-                    .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
+              .catch(err => {
+                console.log(err)
+                this.loading = false
+              })
+          }).catch(err => {
+            console.log(err)
+            this.loading = false
+          })
 
-                  if (this.percentage >= 0 || this.percentage === 'Percent') {
-                    this.indicatorColor = '#19A553'
-                    this.arrowpng = require('../assets/up.png')
-                  } else {
-                    this.indicatorColor = '#E04E36'
-                    this.arrowpng = require('../assets/down.png')
-                  }
-                  this.percentage = this.percentage.toString() + '%'
-                  this.loading = false
-                })
-                .catch(err => {
-                  alert(err)
-                  this.loading = false
-                })
-            })
-            .catch(() => {
-              alert('Failed to load balance.')
-              this.loading = false
-            })
+          // let balance = response.data.balance
+          // if (this.balance === 'Balance') {
+          //   this.percentage = 'Percent'
+          // } else {
+          //   this.percentage = (
+          //     ((balance - this.balanceData) / balance) *
+          //         100
+          //   ).toFixed(2)
+          // }
+          // this.balanceData = balance
+          // this.balance = this.balanceData
+          //   .toString()
+          //   .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
+
+          // if (this.percentage >= 0 || this.percentage === 'Percent') {
+          //   this.indicatorColor = '#19A553'
+          //   this.arrowpng = require('../assets/up.png')
+          // } else {
+          //   this.indicatorColor = '#E04E36'
+          //   this.arrowpng = require('../assets/down.png')
+          // }
+          // this.percentage = this.percentage.toString() + '%'
         })
     },
 
