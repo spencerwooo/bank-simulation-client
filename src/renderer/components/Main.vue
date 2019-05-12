@@ -148,7 +148,76 @@ export default {
       if (this.type === '转账') {
         alert('This feature is not yet implemented.')
       } else {
-        alert(this.type + this.amount)
+        this.loading = true
+
+        if (this.type === '存款') {
+          this.type = 'deposit'
+        } else if (this.type === '取款') {
+          this.type = 'withdraw'
+        }
+
+        let submitData = {
+          'transactionType': 'general',
+          'account': {
+            'username': this.username,
+            'password': this.password
+          },
+          'transactions': {
+            'type': this.type,
+            'amount': this.amount
+          }
+        }
+
+        console.log(submitData)
+
+        // 第一步：排个队
+        this.$http({
+          method: 'post',
+          url: requestUrl + 'queue',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          data: submitData
+        })
+          .then(response => {
+            let token = response.data
+            console.log(token)
+
+            let timeout = 10 * 1000
+            let interval = 1 * 1000
+
+            // 第二步： 开始轮询结果，直到 status 为 TransactionDone
+            this.poll(() => {
+              return this.$http.get(requestUrl + 'status', {
+                params: {
+                  session: token
+                }
+              })
+            }, timeout, interval).then(response => {
+              // 第三步：得到 result
+              this.$http.get(requestUrl + 'result', {
+                params: {
+                  session: token
+                }
+              })
+                .then(response => {
+                  console.log(response.data)
+
+                  // 手动 Refresh，因为唐大佬说 query 才返回正确的 balance
+                  this.refresh()
+
+                  this.loading = false
+                })
+                .catch(err => {
+                  alert(err)
+                  this.loading = false
+                })
+            }).catch(err => {
+              console.log(err)
+              alert(err)
+              this.loading = false
+            })
+          })
       }
 
       this.type = null
@@ -246,6 +315,9 @@ export default {
       this.showMenu = false
       alert('Logging out...')
     }
+  },
+  mounted () {
+    this.refresh()
   }
 }
 </script>
