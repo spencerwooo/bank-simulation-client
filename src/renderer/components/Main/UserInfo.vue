@@ -10,20 +10,30 @@
     <div class="transaction-history">
       <strong>Transactions:</strong>
     </div>
-    <ul class="transaction-history-list">
-      <li>$100</li>
-      <li>$-20</li>
-      <li>$10</li>
+    <ul class="transaction-history-list" v-observe-visibility="visibilityChanged">
+      <li v-for="item in history" :key="item.key">
+        {{ item.key }}: {{ item.type }} ${{ item.amount }}
+      </li>
     </ul>
   </div>
 </div>
 </template>
 
 <script>
+const Store = require('electron-store')
+
 export default {
   data () {
     return {
-      userName: 'Garvey'
+      userName: null,
+      history: null
+    }
+  },
+  methods: {
+    visibilityChanged: function () {
+      const store = new Store()
+      this.userName = store.get('username')
+      this.history = store.get('history')
     }
   }
 }

@@ -3,6 +3,7 @@ import axios from 'axios'
 import vSelect from 'vue-select'
 import VueModalTor from 'vue-modaltor'
 import VueElementLoading from 'vue-element-loading'
+import VueObserveVisibility from 'vue-observe-visibility'
 
 import App from './App'
 import router from './router'
@@ -14,6 +15,7 @@ Vue.config.productionTip = false
 Vue.component('v-select', vSelect)
 Vue.component('VueElementLoading', VueElementLoading)
 Vue.use(VueModalTor)
+Vue.use(VueObserveVisibility)
 
 /* eslint-disable no-new */
 new Vue({

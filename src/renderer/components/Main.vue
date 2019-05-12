@@ -89,7 +89,7 @@
 
 <script>
 import UserInfo from './Main/UserInfo'
-// import { setTimeout } from 'timers'
+const Store = require('electron-store')
 
 let requestUrl = 'http://bk.felinae98.cn:8001/'
 
@@ -105,8 +105,8 @@ export default {
       loading: false,
 
       // 数据
-      username: 'Garvey',
-      password: 'GarveyPassword',
+      username: null,
+      password: null,
       balance: 'Balance',
       balanceData: 0,
       percentage: 'Percent%',
@@ -187,7 +187,7 @@ export default {
             let timeout = 10 * 1000
             let interval = 1 * 1000
 
-            // 第二步： 开始轮询结果，直到 status 为 TransactionDone
+            // 第二步：开始轮询结果，直到 status 为 TransactionDone
             this.poll(() => {
               return this.$http.get(requestUrl + 'status', {
                 params: {
@@ -203,6 +203,24 @@ export default {
               })
                 .then(response => {
                   console.log(response.data)
+
+                  // 将交易结果存一个 history 吧！
+                  const store = new Store()
+                  let history = store.get('history')
+
+                  let storageData = {
+                    key: history.length + 1,
+                    type: submitData['transactions']['type'],
+                    amount: submitData['transactions']['amount']
+                  }
+
+                  if (history) {
+                    store.set('history', history.concat(storageData))
+                  } else {
+                    store.set('history', [storageData])
+                  }
+
+                  console.log(store.get('history'))
 
                   // 手动 Refresh，因为唐大佬说 query 才返回正确的 balance
                   this.refresh()
@@ -316,6 +334,17 @@ export default {
     }
   },
   mounted () {
+    const store = new Store()
+
+    store.set('username', 'Garvey')
+    store.set('password', 'GarveyPassword')
+
+    // 转账历史不删了
+    // store.set('history', '')
+
+    this.username = store.get('username')
+    this.password = store.get('password')
+
     this.refresh()
   }
 }
