@@ -153,7 +153,8 @@ export default {
         if (this.type === '存款') {
           this.type = 'deposit'
         } else if (this.type === '取款') {
-          this.type = 'withdraw'
+          // 傻屌唐大佬非得用名词，透，干他🐴的
+          this.type = 'withdrawal'
         }
 
         let submitData = {
@@ -205,8 +206,6 @@ export default {
 
                   // 手动 Refresh，因为唐大佬说 query 才返回正确的 balance
                   this.refresh()
-
-                  this.loading = false
                 })
                 .catch(err => {
                   alert(err)
