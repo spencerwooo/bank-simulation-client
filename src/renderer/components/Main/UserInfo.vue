@@ -23,12 +23,11 @@
 export default {
   data () {
     return {
-      userName: '风一样的勇士'
+      userName: 'Garvey'
     }
   }
 }
 </script>
-
 
 <style>
 #user-info {

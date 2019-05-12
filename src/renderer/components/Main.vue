@@ -2,7 +2,7 @@
   <div id="wrapper">
     <div class="top-bar">
       <button class="refresh-button" v-on:click="refresh"/>
-      <span>{{ userName }}</span>
+      <span>{{ username }}</span>
       <img
         class="avatar"
         v-if="showMenu"
@@ -105,7 +105,8 @@ export default {
       loading: false,
 
       // 数据
-      userName: 'Bank Simulator',
+      username: 'Garvey',
+      password: 'GarveyPassword',
       balance: 'Balance',
       balanceData: 0,
       percentage: 'Percent%',
@@ -160,8 +161,8 @@ export default {
       let queryData = {
         'transactionType': 'general',
         'account': {
-          'username': 'Garvey',
-          'password': 'GarveyPassword'
+          'username': this.username,
+          'password': this.password
         },
         'transactions': {
           'type': 'query'
@@ -198,39 +199,39 @@ export default {
               .then(response => {
                 console.log(response.data)
 
+                let balance = response.data.balance
+                if (this.balance === 'Balance') {
+                  this.percentage = 'Percent'
+                } else {
+                  this.percentage = (
+                    ((balance - this.balanceData) / balance) *
+                  100
+                  ).toFixed(2)
+                }
+                this.balanceData = balance
+                this.balance = this.balanceData
+                  .toString()
+                  .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
+
+                if (this.percentage >= 0 || this.percentage === 'Percent') {
+                  this.indicatorColor = '#19A553'
+                  this.arrowpng = require('../assets/up.png')
+                } else {
+                  this.indicatorColor = '#E04E36'
+                  this.arrowpng = require('../assets/down.png')
+                }
+                this.percentage = this.percentage.toString() + '%'
+
                 this.loading = false
               })
               .catch(err => {
-                console.log(err)
+                alert(err)
                 this.loading = false
               })
           }).catch(err => {
             console.log(err)
             this.loading = false
           })
-
-          // let balance = response.data.balance
-          // if (this.balance === 'Balance') {
-          //   this.percentage = 'Percent'
-          // } else {
-          //   this.percentage = (
-          //     ((balance - this.balanceData) / balance) *
-          //         100
-          //   ).toFixed(2)
-          // }
-          // this.balanceData = balance
-          // this.balance = this.balanceData
-          //   .toString()
-          //   .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
-
-          // if (this.percentage >= 0 || this.percentage === 'Percent') {
-          //   this.indicatorColor = '#19A553'
-          //   this.arrowpng = require('../assets/up.png')
-          // } else {
-          //   this.indicatorColor = '#E04E36'
-          //   this.arrowpng = require('../assets/down.png')
-          // }
-          // this.percentage = this.percentage.toString() + '%'
         })
     },
 
