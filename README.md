@@ -6,6 +6,11 @@
 
 ![](images/demo.png)
 
+<img src="images/demo-windows.png" alt="Windows Demo" width="250px" align="right"/>
+
+And now...on Windows!
+
+
 ## Build Setup
 
 ``` bash
