@@ -109,7 +109,7 @@ export default {
       password: null,
       balance: 'Balance',
       balanceData: 0,
-      percentage: 'Percent%',
+      percentage: '0.0%',
       type: '',
       amount: '',
       indicatorColor: '#19A553',
@@ -287,7 +287,7 @@ export default {
 
                 let balance = response.data.balance
                 if (this.balance === 'Balance') {
-                  this.percentage = 'Percent'
+                  this.percentage = '0.0'
                 } else {
                   this.percentage = (
                     ((balance - this.balanceData) / balance) *
@@ -299,7 +299,7 @@ export default {
                   .toString()
                   .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
 
-                if (this.percentage >= 0 || this.percentage === 'Percent') {
+                if (this.percentage >= 0 || this.percentage === '0.0') {
                   this.indicatorColor = '#19A553'
                   this.arrowpng = require('../assets/up.png')
                 } else {
