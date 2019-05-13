@@ -208,8 +208,20 @@ export default {
                   const store = new Store()
                   let history = store.get('history')
 
+                  let len = 0
+                  try {
+                    if (history === null) {
+                      len = 0
+                    } else {
+                      len = history.length
+                    }
+                  } catch (error) {
+                    len = 0
+                    alert(error)
+                  }
+
                   let storageData = {
-                    key: history.length + 1,
+                    key: len + 1,
                     type: submitData['transactions']['type'],
                     amount: submitData['transactions']['amount']
                   }
