@@ -217,7 +217,7 @@ export default {
                     }
                   } catch (error) {
                     len = 0
-                    alert(error)
+                    console.log(error)
                   }
 
                   let storageData = {
