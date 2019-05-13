@@ -25,8 +25,13 @@ function createWindow () {
     useContentSize: true,
     width: 420,
     minWidth: 420,
+
+    // macOS 隐藏顶部标题栏
     titleBarStyle: 'hiddenInset'
   })
+
+  // 隐藏 Windows 平台上面的菜单栏
+  mainWindow.setMenu(null)
 
   mainWindow.loadURL(winURL)
 

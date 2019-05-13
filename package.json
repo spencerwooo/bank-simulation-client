@@ -54,6 +54,7 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "custom-electron-titlebar": "^3.0.8",
     "electron-store": "^3.2.0",
     "vue": "^2.5.16",
     "vue-electron": "^1.0.6",
