@@ -439,7 +439,7 @@ export default {
 }
 
 body {
-  font-family: "Maven Pro", "Source Sans Pro", "Microsoft YaHei", sans-serif;
+  font-family: "Maven Pro", 'Noto Sans CJK', 'Sarasa Gothic SC', 'Microsoft YaHei', sans-serif;
   font-size: 14px;
   color: #2c3e50;
 }

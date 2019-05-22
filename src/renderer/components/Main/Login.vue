@@ -63,6 +63,7 @@ button {
   margin-top: 36px;
   width: 100%;
   padding: 10px;
+  font-family: 'Noto Sans CJK', 'Sarasa Gothic SC', 'Microsoft YaHei', sans-serif;
   font-size: 18px;
   text-align: center;
   color: #ffffff;
