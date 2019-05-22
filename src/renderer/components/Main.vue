@@ -31,9 +31,15 @@
           </ul>
         </div>
       </transition>
+
+      <transition name="dropdown">
+        <div class="login" v-bind:class="{ active: notLoggedIn }" v-if="notLoggedIn">
+          <Login @startLogin="onLoginProcedure"/>
+        </div>
+      </transition>
+
       <vue-modaltor
         :visible="showAccountInfo"
-        :animation-panel="'modal-slide-bottom'"
         :bg-overlay="'rgba(255, 255, 255, 0.9)'"
         :bg-panel="'rgb(23, 50, 170)'"
         @hide="hideAccountPanel"
@@ -89,15 +95,19 @@
 
 <script>
 import UserInfo from './Main/UserInfo'
+import Login from './Main/Login'
 const Store = require('electron-store')
 
 let requestUrl = 'http://bk.felinae98.cn:8001/'
 
 export default {
   name: 'landing-page',
-  components: { UserInfo },
+  components: { UserInfo, Login },
   data () {
     return {
+      // 是否登录
+      notLoggedIn: false,
+
       // 显示菜单
       showMenu: false,
       showAccountInfo: false,
@@ -121,6 +131,7 @@ export default {
       this.$electron.shell.openExternal(link)
     },
 
+    // 轮询
     poll (fn, timeout, interval) {
       var endTime = Number(new Date()) + (timeout || 2000)
       interval = interval || 100
@@ -235,7 +246,29 @@ export default {
                   console.log(store.get('history'))
 
                   // 手动 Refresh，因为唐大佬说 query 才返回正确的 balance
-                  this.refresh()
+                  let balance = response.data.balance
+                  if (this.balance === 'Balance') {
+                    this.percentage = '0.0'
+                  } else {
+                    this.percentage = (
+                      ((balance - this.balanceData) / balance) *
+                  100
+                    ).toFixed(2)
+                  }
+                  this.balanceData = balance
+                  this.balance = this.balanceData
+                    .toString()
+                    .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
+
+                  if (this.percentage >= 0 || this.percentage === '0.0') {
+                    this.indicatorColor = '#19A553'
+                    this.arrowpng = require('../assets/up.png')
+                  } else {
+                    this.indicatorColor = '#E04E36'
+                    this.arrowpng = require('../assets/down.png')
+                  }
+                  this.percentage = this.percentage.toString() + '%'
+                  this.loading = false
                 })
                 .catch(err => {
                   alert(err)
@@ -253,6 +286,7 @@ export default {
       this.amount = null
     },
 
+    // 刷新余额
     refresh: function () {
       this.loading = true
 
@@ -297,30 +331,36 @@ export default {
               .then(response => {
                 console.log(response.data)
 
-                let balance = response.data.balance
-                if (this.balance === 'Balance') {
-                  this.percentage = '0.0'
+                if (response.data.result === 'password error') {
+                  this.loading = false
+                  alert('Your user name or password is incorrect. Please relogin.')
+                  this.logOut()
                 } else {
-                  this.percentage = (
-                    ((balance - this.balanceData) / balance) *
+                  let balance = response.data.balance
+                  if (this.balance === 'Balance') {
+                    this.percentage = '0.0'
+                  } else {
+                    this.percentage = (
+                      ((balance - this.balanceData) / balance) *
                   100
-                  ).toFixed(2)
-                }
-                this.balanceData = balance
-                this.balance = this.balanceData
-                  .toString()
-                  .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
+                    ).toFixed(2)
+                  }
+                  this.balanceData = balance
+                  this.balance = this.balanceData
+                    .toString()
+                    .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
 
-                if (this.percentage >= 0 || this.percentage === '0.0') {
-                  this.indicatorColor = '#19A553'
-                  this.arrowpng = require('../assets/up.png')
-                } else {
-                  this.indicatorColor = '#E04E36'
-                  this.arrowpng = require('../assets/down.png')
-                }
-                this.percentage = this.percentage.toString() + '%'
+                  if (this.percentage >= 0 || this.percentage === '0.0') {
+                    this.indicatorColor = '#19A553'
+                    this.arrowpng = require('../assets/up.png')
+                  } else {
+                    this.indicatorColor = '#E04E36'
+                    this.arrowpng = require('../assets/down.png')
+                  }
+                  this.percentage = this.percentage.toString() + '%'
 
-                this.loading = false
+                  this.loading = false
+                }
               })
               .catch(err => {
                 alert(err)
@@ -333,6 +373,7 @@ export default {
         })
     },
 
+    // 设置面板打开与关闭
     showAccountPanel: function () {
       this.showAccountInfo = true
       this.showMenu = false
@@ -340,24 +381,48 @@ export default {
     hideAccountPanel: function () {
       this.showAccountInfo = false
     },
+
+    // Start logging out
     logOut: function () {
       this.showMenu = false
-      alert('Logging out...')
+
+      // 恢复全部余额显示
+      this.balance = 'Balance'
+      this.balanceData = 0
+      this.percentage = '0.0%'
+
+      // 清空数据库
+      const store = new Store()
+      store.delete('username')
+      store.delete('password')
+      store.delete('history')
+
+      this.notLoggedIn = true
+    },
+
+    // 尝试登录
+    onLoginProcedure: function () {
+      this.notLoggedIn = false
+
+      // 从数据库中获取用户名和密码（明文）
+      const store = new Store()
+      this.username = store.get('username')
+      this.password = store.get('password')
+
+      this.refresh()
     }
   },
   mounted () {
     const store = new Store()
-
-    store.set('username', 'Garvey')
-    store.set('password', 'GarveyPassword')
-
-    // 转账历史不删了
-    // store.set('history', '')
-
-    this.username = store.get('username')
-    this.password = store.get('password')
-
-    this.refresh()
+    console.log(store.get('username'))
+    if (typeof store.get('username') === 'undefined') {
+      this.notLoggedIn = true
+    } else {
+      this.notLoggedIn = false
+      this.username = store.get('username')
+      this.password = store.get('password')
+      this.refresh()
+    }
   }
 }
 </script>
@@ -546,6 +611,24 @@ footer {
 
 .vs__dropdown-option--highlight {
   background: #2e49b1 !important;
+}
+
+.login {
+  text-align: center;
+  background: radial-gradient(
+    ellipse at top left,
+    rgb(23, 50, 170) 50%,
+    rgb(140, 25, 207) 100%
+  );
+  border-radius: 5px;
+  position: fixed;
+  padding: 80px;
+  height: 100%;
+  box-shadow: 0px 1px 20px 2px rgba(140, 25, 207, 0.5);
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 4000;
 }
 
 .top-menu {
