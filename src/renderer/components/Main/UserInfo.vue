@@ -1,4 +1,5 @@
 <template>
+<!-- <李文煜> -->
 <div id="user-info">
   <img id="logo" src="@/assets/logo.png" alt="icon">
   <h1>Bank Simulator</h1>
@@ -17,9 +18,11 @@
     </ul>
   </div>
 </div>
+<!-- </李文煜> -->
 </template>
 
 <script>
+// <李文煜>
 const Store = require('electron-store')
 
 export default {
@@ -37,9 +40,11 @@ export default {
     }
   }
 }
+// </李文煜>
 </script>
 
 <style>
+/* </李文煜> */
 #user-info {
   text-align: center;
   font-size: 14px;
@@ -75,4 +80,5 @@ p {
   list-style: none;
   padding: 10px 0px;
 }
+/* </李文煜> */
 </style>

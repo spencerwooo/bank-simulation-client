@@ -1,3 +1,4 @@
+// <武上博>
 'use strict'
 
 import { app, BrowserWindow } from 'electron'
@@ -53,6 +54,8 @@ app.on('activate', () => {
     createWindow()
   }
 })
+
+// </武上博>
 
 /**
  * Auto Updater

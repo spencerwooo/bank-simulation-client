@@ -1,7 +1,12 @@
 <template>
+<!-- <武上博> -->
   <div id="wrapper">
+    <!-- 顶部状态栏 -->
     <div class="top-bar">
+      <!-- 刷新按钮 -->
       <button class="refresh-button" v-on:click="refresh"/>
+
+      <!-- 用户名 -->
       <span>{{ username }}</span>
       <img
         class="avatar"
@@ -19,6 +24,11 @@
         src="~@/assets/account.png"
         alt="avatar"
       >
+
+<!-- </武上博> -->
+<!-- <李文煜> -->
+
+      <!-- 下拉菜单 -->
       <transition name="dropdown">
         <div class="top-menu" v-bind:class="{ active: showMenu }" v-if="showMenu">
           <ul class="top-menu-list">
@@ -38,6 +48,7 @@
         </div>
       </transition>
 
+      <!-- 弹出用户信息和历史记录 -->
       <vue-modaltor
         :visible="showAccountInfo"
         :bg-overlay="'rgba(255, 255, 255, 0.9)'"
@@ -63,10 +74,19 @@
         <UserInfo/>
       </vue-modaltor>
     </div>
+
+<!-- </李文煜> -->
+<!-- <武上博> -->
+
+    <!-- 主界面 -->
     <main>
+
+      <!-- 加载动画 -->
       <vue-element-loading :active="loading" >
         <img src="~@/assets/loading.svg" alt="loading" width="120px" height="120px">
       </vue-element-loading>
+
+      <!-- 主页面逻辑页 -->
       <div class="title">总余额</div>
       <div class="savings">
         <div class="total">${{ balance }}</div>
@@ -89,15 +109,20 @@
         <button class="confirm-button" v-on:click="submit">Confirm</button>
       </div>
     </main>
+
+    <!-- 脚注 -->
     <footer>Team Offline Flower! Made with love ©2019</footer>
   </div>
+<!-- </武上博> -->
 </template>
 
 <script>
+// <武上博>
 import UserInfo from './Main/UserInfo'
 import Login from './Main/Login'
 const Store = require('electron-store')
 
+// 请求后端 API
 let requestUrl = 'http://bk.felinae98.cn:8001/'
 
 export default {
@@ -122,6 +147,8 @@ export default {
       percentage: '0.0%',
       type: '',
       amount: '',
+
+      // 指示器颜色和状态
       indicatorColor: '#19A553',
       arrowpng: require('../assets/up.png')
     }
@@ -131,7 +158,10 @@ export default {
       this.$electron.shell.openExternal(link)
     },
 
-    // 轮询
+    /* Function: poll
+     * 开始轮询
+     ! 异步轮询，在轮询过程中不会将主用户界面阻塞
+     */
     poll (fn, timeout, interval) {
       var endTime = Number(new Date()) + (timeout || 2000)
       interval = interval || 100
@@ -155,6 +185,10 @@ export default {
       return new Promise(checkCondition)
     },
 
+    /* Function: submit
+     * 提交业务
+     ! 提交具体的业务逻辑，包括存款、取款以及相应的金额
+     */
     submit: function () {
       if (this.type === '转账') {
         alert('This feature is not yet implemented.')
@@ -286,7 +320,10 @@ export default {
       this.amount = null
     },
 
-    // 刷新余额
+    /* Function: refresh
+     * 刷新逻辑
+     ! 异步刷新，更新主界面的余额内容
+    */
     refresh: function () {
       this.loading = true
 
@@ -372,17 +409,28 @@ export default {
           })
         })
     },
+    // </武上博>
 
-    // 设置面板打开与关闭
+    // <李文煜>
+
+    /* Function: showAccountPanel
+     * 打开账户页面
+    */
     showAccountPanel: function () {
       this.showAccountInfo = true
       this.showMenu = false
     },
+
+    /* Function: hideAccountPanel
+     * 关闭账户页面
+    */
     hideAccountPanel: function () {
       this.showAccountInfo = false
     },
 
-    // Start logging out
+    /* Function: logOut
+     * 登出逻辑
+    */
     logOut: function () {
       this.showMenu = false
 
@@ -400,7 +448,9 @@ export default {
       this.notLoggedIn = true
     },
 
-    // 尝试登录
+    /* Function: onLoginProcedure
+     * 登录逻辑
+    */
     onLoginProcedure: function () {
       this.notLoggedIn = false
 
@@ -412,6 +462,12 @@ export default {
       this.refresh()
     }
   },
+
+  /* Function: mounted()
+    * 页面加载完毕之后，测试是否有用户登录
+    * 如果用户已经登录，那么自动刷新
+    * 如果用户尚未登录，那么显示登录页面
+  */
   mounted () {
     const store = new Store()
     console.log(store.get('username'))
@@ -424,10 +480,12 @@ export default {
       this.refresh()
     }
   }
+  // </李文煜>
 }
 </script>
 
 <style>
+/* <武上博> */
 @import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro");
 @import url("https://fonts.googleapis.com/css?family=Maven+Pro:400,700");
 @import "./../../../node_modules/vue-select/dist/vue-select.css";
@@ -508,6 +566,10 @@ main {
   padding: 5px;
   border-radius: 5px;
 }
+
+/* </武上博> */
+
+/* <李文煜> */
 
 .indicator .arrow {
   height: 10px;
@@ -672,4 +734,5 @@ footer {
   opacity: 0;
   transform: translateY(-10px);
 }
+/* </李文煜> */
 </style>

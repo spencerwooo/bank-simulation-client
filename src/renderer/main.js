@@ -1,3 +1,5 @@
+// <武上博>
+
 import Vue from 'vue'
 import axios from 'axios'
 import vSelect from 'vue-select'
@@ -23,3 +25,5 @@ new Vue({
   router,
   template: '<App/>'
 }).$mount('#app')
+
+// </武上博>
