@@ -1,6 +1,6 @@
 {
   "name": "bank-simulation-client",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "spencerwooo <spencerwoo98@gmail.com>",
   "description": "A bank simulation client",
   "license": "MIT",
